@@ -1,0 +1,14 @@
+{
+  "name": "api",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "devDependencies": {
+    "serverless": "^3.38.0",
+    "serverless-offline": "^13.3.3",
+    "serverless-offline-ssm": "^6.2.0"
+  },
+  "dependencies": {
+    "dotenv": "^16.4.5"
+  }
+}

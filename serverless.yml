@@ -1,0 +1,100 @@
+service: contacts
+plugins:
+  - serverless-offline
+  - serverless-offline-ssm
+
+package:
+  individually: true
+  patterns:
+    - "!**"
+    - src/**
+
+custom:
+  serverless-offline-ssm:
+    stages:
+      - offline
+    ssm:
+      '/app/idl/documents_archive': 'test-documents-archive'
+      '/app/idl/documents_db': 'test-idl-documents'
+      '/app//documents_bucket': 'test-documents-archive'
+
+provider:
+  stage: ${opt:stage, 'offline'}
+  name: aws
+  runtime: python3.8
+  region: us-east-1
+
+functions:
+  get-contacts:
+    name: "${self:provider.stage}-get-contacts-service"
+    events:
+      - http:
+          path: /get_contacts
+          method: get
+          cors: true
+    handler: src/contacts.get_contacts
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+  get-personal_info:
+    name: "${self:provider.stage}-personal-info-service"
+    timeout: 30
+    events:
+      - http:
+          path: /personal_info
+          method: get
+          cors: true
+    handler: src/contacts.personal_info
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+  add-new-contact:
+    name: "${self:provider.stage}-new-contact-service"
+    timeout: 30
+    events:
+      - http:
+          path: /new_contact
+          method: post
+          cors: true
+    handler: src/contacts.new_contact
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+      JN_DOCUMENTS_SERVICE_BUCKET: ${ssm:/documents_bucket}
+  update-contact:
+    name: "${self:provider.stage}-edit-contact-service"
+    timeout: 30
+    events:
+      - http:
+          path: /edit_contact
+          method: post
+          cors: true
+    handler: src/contacts.edit_contact
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+      JN_DOCUMENTS_SERVICE_BUCKET: ${ssm:/documents_bucket}
+  get-delete_contact:
+    name: "${self:provider.stage}-delete-contacts-service"
+    events:
+      - http:
+          path: /delete_contact
+          method: get
+          cors: true
+    handler: src/contacts.delete_contact
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+  upload-image:
+    name: "${self:provider.stage}-upload-image-service"
+    timeout: 30
+    events:
+      - http:
+          path: /upload_image
+          method: post
+          cors: true
+    handler: src/contacts.upload_image
+    environment:
+      JN_DEBUG: 0
+      JN_STAGE: ${self:provider.stage}
+      JN_DOCUMENTS_SERVICE_BUCKET: ${ssm:/documents_bucket}
